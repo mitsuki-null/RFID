@@ -1,0 +1,46 @@
+# 受信データの全てを読み取る関数
+def serialReadLines(serial):
+    received_data_list = []
+    while True:
+        # データを受信
+        received_data = serial.read(READ_BYTE)  # 最大[READ_BYTE]バイトまでのデータを受信
+        hex_data = binascii.hexlify(received_data).decode("utf-8").strip()  # 余計な空白や改行を削除
+
+        if received_data and len(hex_data) == 64:  # 読み込んだデータがある　かつ　データ数が32バイトの時
+            received_data_list.append(hex_data)
+            print("Received Data:", hex_data)
+        
+        else:  # 読み込んだデータがなければ終了
+            print("LIST:")
+            print(received_data_list)
+            return received_data_list
+
+# 全てのデータの取り出し（forループ内）部分修正
+for rcv_data in rcv_data_list:
+    # 読み取ったデータのIDがすでに存在するか
+    check_str = df[df["ID"] == rcv_data]
+
+    # rcv_dataで得たIDがデータベースに存在しない場合
+    if check_str.empty:
+        # IDをデータベースに登録
+        new_data = pd.DataFrame({"ID": [rcv_data], "existence": [True]})
+        df = pd.concat([df, new_data], ignore_index=True)
+        print("ID: " + rcv_data +"をデータベースに登録しました。")
+
+    # rcv_dataで得たIDがデータベースに存在する場合
+    elif check_str.iloc[0]["existence"] == True:
+        # 指定IDの保管データをFalseに（貸し出し処理）
+        df.loc[df["ID"] == rcv_data, "existence"] = False
+        print("ID: " + rcv_data +"を貸し出しました。")
+
+    # 倉庫内に保管されていない場合
+    elif check_str.iloc[0]["existence"] == False:
+        # 指定IDの保管データをTrueに（返却処理）
+        df.loc[df["ID"] == rcv_data, "existence"] = True
+        print("ID: " + rcv_data +"を返却しました。")
+    
+    else:
+        print("データベース記録エラー")
+
+# CSVファイルの更新
+df.to_csv(csv_file, index=False, encoding='utf-8')  # エンコーディングをutf-8に指定

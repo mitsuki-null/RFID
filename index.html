@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>在庫管理</title>
+    <link rel="stylesheet" href="style.css">
+    <script>
+        // 5秒ごとにページをリロード(表の更新のため)
+        setTimeout(function() {
+            window.location.reload();
+        }, 5000);
+    </script> 
+</head>
+<body>
+    <div class="container">
+        <h1>倉庫管理システム</h1>
+        {{ table | safe }} 
+    </div>
+</body>
+</html>
